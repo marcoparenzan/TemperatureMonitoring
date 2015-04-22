@@ -19,6 +19,14 @@
       <Name>LowerTemp</Name>
       <CommandType>Local</CommandType>
     </ViewModelCommandRef>
+    <ViewModelCommandRef>
+      <Name>Exit</Name>
+      <CommandType>Local</CommandType>
+    </ViewModelCommandRef>
+    <ViewModelCommandRef>
+      <Name>Reset</Name>
+      <CommandType>Local</CommandType>
+    </ViewModelCommandRef>
   </Commands>
   <Properties>
     <ViewModelPropertyDef>

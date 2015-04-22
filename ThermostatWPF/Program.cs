@@ -30,6 +30,7 @@ using System.Windows;
 using ThermostatWPF.Views;
 using ThermostatCore.Common;
 using ThermostatCore.ViewModels;
+using System.Windows.Threading;
 
 namespace ThermostatWPF
 {
@@ -39,23 +40,53 @@ namespace ThermostatWPF
         [STAThread]
         static void Main(string[] args)
         {
+            var serialPortName = ConfigurationManager.AppSettings["ThermostatPort"];
+            var serial = new SerialPort(serialPortName, 9600, Parity.None, 8, StopBits.One);
+
             var view = new NavigationWindow();
             view.WindowStyle = WindowStyle.None;
             view.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            view.WindowState = WindowState.Maximized;
             var navigation = (INavigation)view;
 
-            var serialPortName = ConfigurationManager.AppSettings["ThermostatPort"];
-            var serial = new SerialPort(serialPortName, 9600, Parity.None, 8, StopBits.One);
-            serial.Open();
+            Action rts = () =>
+            {
+                serial.DtrEnable = true;
+                System.Threading.Thread.Sleep(100);
+                serial.DtrEnable = false;
+            };
 
-            navigation.View("ThermostatView").ViewModel(new ThermostatViewModel(
+            var viewModel = new ThermostatViewModel(
                 navigation
-                , () => {
-                    if (serial.BytesToRead == 0) return string.Empty;
-                    return serial.ReadLine();
+                , _ => { serial.Write(_ + "\n"); }
+                , () => { view.Close(); }
+                , rts
+            );
+            serial.DataReceived += (s, e) =>
+            {
+                var line = serial.ReadLine();
+                line = line.Trim('\r', '\n', '\r', ' ');
+                if (string.IsNullOrWhiteSpace(line)) return;
+                var response = line.Split('=');
+                try
+                {
+                    viewModel.Handle(response[0].Trim().ToUpper(), response[1].Trim().ToUpper());
                 }
-                , _ => { serial.WriteLine(_); }
-            ));
+                catch
+                {
+                    rts();
+                }
+            };
+
+            serial.Open();
+            //var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            //dispatcherTimer.Tick += (s, e) => {
+            //    serial.WriteLine("GETSTATE");            
+            //};
+            //dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            //dispatcherTimer.Start();
+
+            navigation.View("ThermostatView").ViewModel(viewModel);
 
             var application = new Application();
             application.Run(view);

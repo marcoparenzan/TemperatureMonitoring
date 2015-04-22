@@ -3,8 +3,9 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 					xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
     <Style x:Key="ThermostatButton" TargetType="{x:Type Button}">
-        <Setter Property="Width" Value="30"/>
-        <Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="60"/>
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="Margin" Value="5"/>
     </Style>
 
 </ResourceDictionary>

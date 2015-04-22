@@ -32,84 +32,74 @@ namespace ThermostatCore.ViewModels
 {
     public partial class ThermostatViewModel
     {
-        private Func<string> _read;
+        private INavigation _navigation;
         private Action<string> _write;
+        private Action _exit1;
+        private Action _reset1;
 
-        private Queue<string> _commands;
-
-        public ThermostatViewModel(INavigation navigation, Func<string> read, Action<string> write)
+        public ThermostatViewModel(INavigation navigation, Action<string> write, Action exit, Action rts)
         {
-            this._read = read;
+            this._navigation = navigation;
             this._write = write;
-            this._commands = new Queue<string>();
+            this._exit1 = exit;
+            this._reset1 = rts;
+        }
 
-            Task poll = null;
-            poll = Task.Run(() =>
+        public void Handle(string messageType, string messageValue)
+        {
+            switch (messageType)
             {
-                while (true)
-                {
-                    if (_commands.Count == 0)
+                case "COMMANDRESULT":
+                    break;
+                case "STATE":
+                    _navigation.Invoke(() =>
                     {
-                        _commands.Enqueue("GETSTATE");
-                        poll.Wait(100);
-                        continue;
-                    }
-                    else
-                    {
-                        while (true)
-                        {
-                            if (_commands.Count == 0) break;
-                            var command = _commands.Dequeue();
-                            write(command);
-                        }
-                    }
-                    var line = read();
-                    if (string.IsNullOrWhiteSpace(line))
-                    {
-                        poll.Wait(100);
-                        continue;
-                    }
-                    else
-                    {
-                        var response = line.Split('=');
-                        switch (response[0].Trim().ToUpper())
-                        {
-                            case "COMMANDRESULT":
-                                break;
-                            case "STATE":
-                                navigation.Invoke(() =>
-                                {
-                                    var state = response[1].Trim().ToUpper().Split(';');
-                                    Temp = decimal.Parse(state[0]);
-                                    TempRef = decimal.Parse(state[1]);
-                                    Power = state[2] == "1";
-                                    Resistor = state[3] == "1";
-                                });
-                                break;
-                        }
-                    }
-                }
+                        var state = messageValue.Split(';');
+                        Temp = decimal.Parse(state[0].Replace(".", ","));
+                        TempRef = decimal.Parse(state[1]);
+                        Power = state[2] == "1";
+                        Resistor = state[3] == "1";
+                    });
+                    break;
+            }
+        }
+
+        private void Command(string command)
+        {
+            _navigation.Invoke(() =>
+            {
+                _write(command);
             });
         }
 
         partial void OnPowerOff(ThermostatViewModel.PowerOffArgs args)
         {
-            _commands.Enqueue("POWEROFF");
+            Command("POWEROFF");
         }
 
         partial void OnPowerOn(ThermostatViewModel.PowerOnArgs args)
         {
-            _commands.Enqueue("POWERON");
+            Command("POWERON");
         }
 
         partial void OnHigherTemp(ThermostatViewModel.HigherTempArgs args)
         {
-            _commands.Enqueue("HIGHERTEMP");
+            Command("HIGHERTEMP");
         }
 
         partial void OnLowerTemp(ThermostatViewModel.LowerTempArgs args)
         {
-            _commands.Enqueue("LOWERTEMP");
+            Command("LOWERTEMP");
+        }
+
+        partial void OnExit(ThermostatViewModel.ExitArgs args)
+        {
+            _exit1();
+        }
+
+        partial void OnReset(ThermostatViewModel.ResetArgs args)
+        {
+            _reset1();
         }
     }
 }

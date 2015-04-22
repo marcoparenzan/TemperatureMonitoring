@@ -1,10 +1,16 @@
-﻿<UserControl x:Class="ThermostatWPF.Views.ThermostatView"
+﻿<UserControl xmlns:gauge="http://mindfusion.eu/gauges/wpf" 
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:eo="http://schemas.essentialobjects.com/wpf/" x:Class="ThermostatWPF.Views.ThermostatView" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             xmlns:gauges="http://mindfusion.eu/gauges/wpf"
+             d:DesignHeight="300" d:DesignWidth="300"
+             FontFamily="Consolas"
+             FontSize="20"         
+             Background="SteelBlue"
+    >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -14,26 +20,38 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Temp}"></TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TempRef}"></TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Power}"></TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Resistor}"></TextBlock>
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="4" HorizontalAlignment="Center">
-            <Button Command="{Binding PowerOn}" Style="{StaticResource ThermostatButton}">On</Button>
-            <Button Command="{Binding PowerOff}" Style="{StaticResource ThermostatButton}">Off</Button>
-            <Button Command="{Binding HigherTemp}" Style="{StaticResource ThermostatButton}">+</Button>
-            <Button Command="{Binding LowerTemp}" Style="{StaticResource ThermostatButton}">-</Button>
+        <Image Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Source="/ThermostatWPF;component/Theme/1nn0va.png"></Image>
+        <gauges:OvalScale Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3">
+            <gauges:OvalScale MinValue="0" MaxValue="100">
+                <gauges:OvalScale.Pointers>
+                    <gauges:Pointer Value="{Binding Temp}" />
+                </gauges:OvalScale.Pointers>
+            </gauges:OvalScale>
+        </gauges:OvalScale>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TempRef}" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Power}" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding Resistor}" HorizontalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="5" HorizontalAlignment="Center">
+            <Button Command="{Binding PowerOn}" Style="{StaticResource ThermostatButton}" Content="On"/>
+            <Button Command="{Binding PowerOff}" Style="{StaticResource ThermostatButton}" Content="Off"/>
+            <Button Command="{Binding HigherTemp}" Style="{StaticResource ThermostatButton}" Content="+"/>
+            <Button Command="{Binding LowerTemp}" Style="{StaticResource ThermostatButton}" Content="-"/>
+            <Button Command="{Binding RTS}" Style="{StaticResource ThermostatButton}" Content="RTS"/>
+            <Button Command="{Binding Exit}" Style="{StaticResource ThermostatButton}" Content="Exit"/>
         </StackPanel>
     </Grid>
 </UserControl>

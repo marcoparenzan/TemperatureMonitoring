@@ -304,6 +304,102 @@ namespace ThermostatCore.ViewModels
 			}
 			
 			#endregion		
+				
+			#region Local Command Exit
+			
+			public partial class ExitArgs: BaseArgs
+			{
+			}
+			
+			public ExitArgs ExitCommandArgs
+			{
+				get
+				{
+					ExitArgs args = new ExitArgs {
+					};
+					return args;
+				}
+			}
+
+			partial void OnExit(ExitArgs args);
+
+			partial void OnExitEnable(Action<bool> enableHandler);
+
+			private RelayCommand<ExitArgs> _exit; // ICommand
+
+			public RelayCommand<ExitArgs> Exit // ICommand
+			{
+				get
+				{
+					if (_exit == null)
+					{
+						_exit = new RelayCommand<ExitArgs>(new Action<ExitArgs>(
+							_ =>
+							{
+								OnExit(_);
+							}
+						),
+						_ => {
+							bool enabled = true;
+							OnExitEnable(enable => {
+								enabled = enable;
+							});
+							return enabled;
+						});
+					}
+					return _exit;
+				}
+			}
+			
+			#endregion		
+				
+			#region Local Command Reset
+			
+			public partial class ResetArgs: BaseArgs
+			{
+			}
+			
+			public ResetArgs ResetCommandArgs
+			{
+				get
+				{
+					ResetArgs args = new ResetArgs {
+					};
+					return args;
+				}
+			}
+
+			partial void OnReset(ResetArgs args);
+
+			partial void OnResetEnable(Action<bool> enableHandler);
+
+			private RelayCommand<ResetArgs> _reset; // ICommand
+
+			public RelayCommand<ResetArgs> Reset // ICommand
+			{
+				get
+				{
+					if (_reset == null)
+					{
+						_reset = new RelayCommand<ResetArgs>(new Action<ResetArgs>(
+							_ =>
+							{
+								OnReset(_);
+							}
+						),
+						_ => {
+							bool enabled = true;
+							OnResetEnable(enable => {
+								enabled = enable;
+							});
+							return enabled;
+						});
+					}
+					return _reset;
+				}
+			}
+			
+			#endregion		
 			
 					#region Temp Property
 			
