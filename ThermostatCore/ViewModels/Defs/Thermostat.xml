@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ViewModelDef>
+  <Name>Thermostat</Name>
+  <ViewModelType>Execute</ViewModelType>
+  <Commands>
+    <ViewModelCommandRef>
+      <Name>PowerOn</Name>
+      <CommandType>Local</CommandType>
+    </ViewModelCommandRef>
+    <ViewModelCommandRef>
+      <Name>PowerOff</Name>
+      <CommandType>Local</CommandType>
+    </ViewModelCommandRef>
+    <ViewModelCommandRef>
+      <Name>HigherTemp</Name>
+      <CommandType>Local</CommandType>
+    </ViewModelCommandRef>
+    <ViewModelCommandRef>
+      <Name>LowerTemp</Name>
+      <CommandType>Local</CommandType>
+    </ViewModelCommandRef>
+  </Commands>
+  <Properties>
+    <ViewModelPropertyDef>
+      <Name>Temp</Name>
+      <TypeName>decimal</TypeName>
+    </ViewModelPropertyDef>
+    <ViewModelPropertyDef>
+      <Name>TempRef</Name>
+      <TypeName>decimal</TypeName>
+    </ViewModelPropertyDef>
+    <ViewModelPropertyDef>
+      <Name>Power</Name>
+      <TypeName>bool</TypeName>
+    </ViewModelPropertyDef>
+    <ViewModelPropertyDef>
+      <Name>Resistor</Name>
+      <TypeName>bool</TypeName>
+    </ViewModelPropertyDef>
+  </Properties>
+</ViewModelDef>

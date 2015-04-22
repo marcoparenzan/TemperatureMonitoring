@@ -1,0 +1,40 @@
+﻿<#+
+public class ExecuteViewModelTemplate : ViewModelTemplate
+{
+    public override string TransformText()
+    {
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Input;
+
+using ThermostatCore.Common;
+
+namespace ThermostatCore.ViewModels
+{
+	#region Class <#=ViewModelDef.Name #>ViewModel
+
+	public partial class <#=ViewModelDef.Name #>ViewModel: <#= BaseViewModel(ViewModelDef) #>
+    {
+		<#+ LocalCommand("Execute"); #>
+		
+		<#+ LocalCommand("Commit"); #>
+	
+		<#+ Commands(ViewModelDef); #>
+
+		<#+ Properties(ViewModelDef); #>
+
+		<#+ ItemsProperties(ViewModelDef); #>
+	}
+	
+	#endregion
+}
+<#+
+		return this.GenerationEnvironment.ToString();
+	} // public override string TransformText()
+} // public class Template : Template
+#>

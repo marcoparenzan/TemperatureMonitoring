@@ -1,0 +1,52 @@
+﻿<#+
+public class ClassViewModelTemplate : ViewModelTemplate
+{
+	public override string TransformText()
+    {
+#>
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Input;
+
+using ThermostatCore.Common;
+
+namespace ThermostatCore.ViewModels
+{
+	#region Class <#=ViewModelDef.Name #>ViewModel
+
+	public partial class <#=ViewModelDef.Name #>ViewModel: <#= BaseViewModel(ViewModelDef) #>
+	{
+		private <#=ViewModelDef.TypeName #> _entity;
+	
+		public static <#=ViewModelDef.Name #>ViewModel Bind(
+			<#=ViewModelDef.TypeName #> value
+		)
+		{
+			var viewModel = new <#=ViewModelDef.Name #>ViewModel {
+				_entity = value 
+			};
+			
+			return viewModel;
+		}
+	
+		<#+ EntityProperties(); #>
+
+		<#+ Commands(ViewModelDef); #>
+				
+		<#+ Properties(ViewModelDef); #>
+
+		<#+ ItemsProperties(ViewModelDef); #>
+	}
+	
+	#endregion
+}
+<#+
+        return this.GenerationEnvironment.ToString();
+    }
+}
+#>

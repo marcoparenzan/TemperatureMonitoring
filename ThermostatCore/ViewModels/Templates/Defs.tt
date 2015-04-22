@@ -1,0 +1,67 @@
+﻿<#+
+	public class ViewModelDef
+	{
+		public string Name { get; set; }
+		public string TypeName { get; set; }
+		public string BaseViewModel { get; set; }
+		public string ViewModelType { get; set; }
+		public ViewModelCommandRef[] Commands { get; set; }
+		public ViewModelItemsPropertyDef[] ItemsProperties { get; set; }
+		public ViewModelPropertyDef[] Properties { get; set; }
+
+		public ViewModelDef()
+		{
+			Commands = new ViewModelCommandRef[] {};
+			ItemsProperties = new ViewModelItemsPropertyDef[] {};
+			Properties = new ViewModelPropertyDef[] {};
+		}
+	}
+#>
+<#+
+	public class ViewModelCommandRef
+	{
+		public string Name { get; set; }
+		public string TypeName { get; set; }
+		public string CommandType { get; set; }
+		
+		public ViewModelCommandRef()
+		{
+			CommandType = "Local";
+		}
+	}
+#>
+<#+
+	public class ViewModelItemsPropertyDef
+	{
+		public string Name { get; set; }
+		public string TypeName { get; set; }
+	}
+#>
+<#+
+	public class ViewModelPropertyDef
+	{
+		public string Name { get; set; }
+		public string TypeName { get; set; }
+	}
+#>
+<#+
+	ViewModelDef[] ReadViewModelDefs(string filename)
+	{
+		XmlSerializer serializer = new XmlSerializer(typeof(ViewModelDef[]));
+		string templateDirectory = Path.GetDirectoryName(this.Host.TemplateFile);
+		XmlReader reader = new XmlTextReader(Path.Combine(templateDirectory, filename));	
+		var viewModelDefs = (ViewModelDef[]) serializer.Deserialize(reader);
+		return viewModelDefs;
+	}
+#>
+<#+
+	ViewModelDef ReadViewModelDef(string filename)
+	{
+		XmlSerializer serializer = new XmlSerializer(typeof(ViewModelDef));
+		//string templateDirectory = Path.GetDirectoryName(this.Host.TemplateFile);
+		// XmlReader reader = new XmlTextReader(Path.Combine(templateDirectory, filename));	
+		XmlReader reader = new XmlTextReader(filename);	
+		var viewModelDef = (ViewModelDef) serializer.Deserialize(reader);
+		return viewModelDef;
+	}
+#>

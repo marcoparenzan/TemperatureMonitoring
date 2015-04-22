@@ -1,0 +1,38 @@
+﻿<#@ template language="C#" debug="true" hostSpecific="true" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ assembly name="System.Xml.dll" #>
+
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="System.Xml.Serialization" #>
+
+<#@ include file="Templates\Toolbox.tt" #>
+
+<#@ include file="Templates\ExecuteViewModelTemplate.tt" #>
+
+<#
+	var defsDirectory = Path.Combine(Path.GetDirectoryName(this.Host.TemplateFile), "Defs");
+	foreach(var viewModelDefFileName in System.IO.Directory.GetFiles(defsDirectory))
+	{
+		var viewModelDef = ReadViewModelDef(viewModelDefFileName);
+		switch(viewModelDef.ViewModelType)
+		{
+			case "Execute":
+				GenerateViewModel<ExecuteViewModelTemplate>(viewModelDef);
+				break;
+			default:
+				break;
+				throw new NotImplementedException("ViewModel type not known");
+		}	
+	}
+#>
+<#+
+	void GenerateViewModel<T>(ViewModelDef viewModelDef)
+		where T: ViewModelTemplate
+	{
+		T t = Activator.CreateInstance<T>();
+		t.ViewModelDef = viewModelDef;
+		t.RenderToFile(viewModelDef.Name + "ViewModel.g.cs");
+	}
+#>

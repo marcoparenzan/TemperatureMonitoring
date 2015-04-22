@@ -1,0 +1,11 @@
+﻿{
+  "$schema": "http://json-schema.org/schemas/2014-11-01/apiapp.json#",
+  "id": "TemperatureMonitoringMobileService",
+  "namespace": "microsoft.com",
+  "gateway": "2015-01-14",
+  "version": "1.0.0",
+  "title": "TemperatureMonitoringMobileService",
+  "summary": "",
+  "author": "",
+  "endpoints": null
+}

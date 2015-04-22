@@ -1,0 +1,323 @@
+﻿<#@ assembly name="System.Data.Entity.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Data.Objects.DataClasses" #>
+<#@ import namespace="System.Reflection" #>
+<#+
+	public abstract class ViewModelTemplate: Template 
+	{
+		public ViewModelDef ViewModelDef { get; set; }
+#>
+<#+
+		protected void Commands(ViewModelDef viewModelDef)
+		{
+			foreach(ViewModelCommandRef viewModelCommandRef in viewModelDef.Commands)
+			{
+				switch(viewModelCommandRef.CommandType)
+				{
+					case "Local":
+						LocalCommand(viewModelCommandRef.Name);
+						break;
+					case "Global":
+						GlobalCommand(viewModelCommandRef.Name, viewModelCommandRef.TypeName);
+						break;
+					default:
+						throw new NotSupportedException();
+				}
+			}
+		}
+#>
+<#+
+		protected void ItemsProperties(ViewModelDef viewModelDef)
+		{
+			foreach(var viewModelItemsPropertyDef in viewModelDef.ItemsProperties)
+			{
+				ItemsProperty(viewModelItemsPropertyDef.Name, viewModelItemsPropertyDef.TypeName);
+			}
+		}
+#>
+<#+
+		protected void Properties(ViewModelDef viewModelDef)
+		{
+			foreach(var viewModelPropertyDef in viewModelDef.Properties)
+			{
+				Property(viewModelPropertyDef.Name, viewModelPropertyDef.TypeName);
+			}
+		}
+#>
+<#+
+		protected string BaseViewModel(ViewModelDef viewModelDef)
+		{
+			if (!string.IsNullOrWhiteSpace(viewModelDef.BaseViewModel))
+				return viewModelDef.BaseViewModel;
+			else
+				return "DataViewModel";
+		}
+#>
+<#+
+		protected void GlobalCommand(string name, string typeName)
+		{
+			string lcase = name.Substring(0,1).ToLower() + name.Substring(1);
+			string ucase = name.Substring(0,1).ToUpper() + name.Substring(1);
+			string argsTypeName = typeName + "Args";
+			#>	
+			#region Global Command <#= ucase #>
+
+			partial void On<#= ucase #>ArgsInitialize(<#= argsTypeName #> args);
+			
+			public <#= argsTypeName #> <#= ucase #>CommandArgs
+			{
+				get
+				{
+					<#= argsTypeName #> args = new <#= argsTypeName #> {
+						UpdateHandler = a => {
+							On<#= argsTypeName #>Initialize(a);
+						}
+					};
+					return args;
+				}
+			}
+			
+			private ICommand _<#= lcase #>;
+
+			public ICommand <#= ucase #>
+			{
+				get
+				{
+					if (_<#= lcase #> == null)
+					{
+						_<#= lcase #> = CommandBinder.Default.FindCommand("<#= typeName #>");
+					}
+					return _<#= lcase #>;
+				}
+			}
+			
+			#endregion		
+			<#+
+		}
+#>
+<#+
+		protected void LocalCommand(string name)
+		{
+			string lcase = name.Substring(0,1).ToLower() + name.Substring(1);
+			string ucase = name.Substring(0,1).ToUpper() + name.Substring(1);
+			string argsTypeName = ucase + "Args";
+			#>	
+			#region Local Command <#= ucase #>
+			
+			public partial class <#= argsTypeName #>: BaseArgs
+			{
+			}
+			
+			public <#= argsTypeName #> <#= ucase #>CommandArgs
+			{
+				get
+				{
+					<#= argsTypeName #> args = new <#= argsTypeName #> {
+					};
+					return args;
+				}
+			}
+
+			partial void On<#= ucase #>(<#= argsTypeName #> args);
+
+			partial void On<#= ucase #>Enable(Action<bool> enableHandler);
+
+			private RelayCommand<<#= argsTypeName #>> _<#= lcase #>; // ICommand
+
+			public RelayCommand<<#= argsTypeName #>> <#= ucase #> // ICommand
+			{
+				get
+				{
+					if (_<#= lcase #> == null)
+					{
+						_<#= lcase #> = new RelayCommand<<#= argsTypeName #>>(new Action<<#= argsTypeName #>>(
+							_ =>
+							{
+								On<#= ucase #>(_);
+							}
+						),
+						_ => {
+							bool enabled = true;
+							On<#= ucase #>Enable(enable => {
+								enabled = enable;
+							});
+							return enabled;
+						});
+					}
+					return _<#= lcase #>;
+				}
+			}
+			
+			#endregion		
+			<#+
+		}
+#>
+<#+
+		protected void ItemsProperty(string name, string typeName)
+		{
+			string lcase = name.Substring(0,1).ToLower() + name.Substring(1);
+			string ucase = name.Substring(0,1).ToUpper() + name.Substring(1);
+			#>		
+			#region Items <#=ucase #> Property
+			
+			private ItemsViewModel<<#=typeName #>> _items<#=ucase #>;
+			
+			partial void OnItems<#=ucase #>Create(Action<ItemsViewModel<<#=typeName #>>> newItems);
+
+			public ItemsViewModel<<#=typeName #>> Items<#=ucase #>
+			{
+				get
+				{
+				if (_items<#=ucase #> == null)
+				{
+					_items<#=ucase #>  = null;
+					OnItems<#=ucase #>Create(newItems => {
+						_items<#=ucase #> = newItems;
+					});
+					if (_items<#=ucase #>  == null)
+						_items<#=ucase #>  = new ItemsViewModel<<#=typeName #>>();
+				}
+					return _items<#=ucase #>;
+				}
+			}
+			
+			#endregion		
+			<#+
+		}
+#>
+<#+
+		protected void Property(string name, string typeName)
+		{
+			string lcase = name.Substring(0,1).ToLower() + name.Substring(1);
+			string ucase = name.Substring(0,1).ToUpper() + name.Substring(1);
+			#>
+			#region <#=ucase #> Property
+			
+			private <#=typeName #> _<#=lcase #>;
+			
+			partial void OnSet<#=ucase #>(<#=typeName #> last<#=ucase #>, Action<<#=typeName #>> handleSet);
+			partial void OnGet<#=ucase #>(<#=typeName #> value);
+	
+			private void Set<#=ucase #>(<#=typeName #> alternateValue)
+			{
+				_<#=lcase #> = alternateValue;
+			}
+
+			public <#=typeName #> <#=ucase #>
+			{
+				get
+				{
+					OnGet<#=ucase #>(_<#=lcase #>);
+					return _<#=lcase #>;
+				}
+				
+				set
+				{
+					if (value == _<#=lcase #>) return;
+					var last<#=ucase #> = _<#=lcase #>;
+					_<#=lcase #> = value;
+					OnSet<#=ucase #>(
+						last<#=ucase #>
+						, new Action<<#=typeName #>>(Set<#=ucase #>));
+					Notify("<#=ucase #>");
+				}
+			}
+			
+			#endregion
+			<#+
+		}
+#>
+<#+
+		protected void EntityProperties()
+		{
+#>
+		#region Entity Properties
+<#+
+		string tempAssemblyFileName = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+		File.Copy(@"E:\Progetti\Canton\Appliances\Source\Models\bin\Debug\Models.dll", tempAssemblyFileName, true);
+		var assembly = Assembly.LoadFrom(tempAssemblyFileName);
+		var type = assembly.GetType("Models." + ViewModelDef.TypeName);
+
+		foreach(PropertyInfo pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+		{
+			var typeName = pi.PropertyType.Name;
+			if (pi.PropertyType.IsGenericType)
+			{
+				var genericArgsText = string.Empty;
+				var genericArgs = pi.PropertyType.GetGenericArguments();
+				if (genericArgs.Length == 1)
+					genericArgsText = genericArgs[0].Name;
+				else
+				{
+					var texts = new System.Collections.Generic.List<String>();
+					foreach(Type t in genericArgs)
+						texts.Add(t.Name);
+					genericArgsText = string.Join(", ", texts);
+				}
+				
+				typeName = string.Format("{0}<{1}>", typeName.Substring(0, typeName.Length-2), genericArgsText);
+			}
+#>
+		#region <#= pi.Name #> Property
+		
+
+	<#+ if (pi.PropertyType.IsSubclassOf(typeof(ComplexObject))) {	#>
+	
+		private <#= typeName #>ViewModel _<#= pi.Name #>ViewModel;
+		
+		public <#= typeName #>ViewModel <#= pi.Name #>
+        {
+            get
+            {
+				if (_<#= pi.Name #>ViewModel == null)
+				{
+					_<#= pi.Name #>ViewModel = 
+						<#= typeName #>ViewModel.Bind(
+							_entity.<#= pi.Name #>);
+				}
+                return  _<#= pi.Name #>ViewModel;
+            }
+        }
+	<#+ } else if (pi.PropertyType.Name.StartsWith("EntityCollection")) {	
+			var subType = pi.PropertyType.GetGenericArguments()[0];
+		#>
+
+		public ItemsViewModel<<#= subType.Name #>> <#= pi.Name #>
+        {
+            get
+            {
+                return new ItemsViewModel<<#= subType.Name #>>(_entity.<#= pi.Name #>);
+            }
+        }
+		
+	<#+ } else { #>
+	
+        public <#= typeName #> <#= pi.Name #>
+        {
+            get
+            {
+                return _entity.<#= pi.Name #>;
+            }
+			
+			<#+ if ((pi.CanWrite)) { #>
+			set
+			{
+				_entity.<#= pi.Name #> = value;
+				Notify("<#= pi.Name #>");
+			}
+			<#+ } #>
+        }
+	<#+ } #>
+
+		#endregion
+<#+
+		}
+#>	
+
+		#endregion
+<#+
+		}
+#>
+<#+
+	}
+#>

@@ -1,0 +1,5 @@
+﻿<#@ include file="T4Toolbox.tt" #>
+<#@ include file="Defs.tt" #> 
+<#@ include file="ViewModelTemplate.tt" #> 
+
+<#@ import namespace="System" #>
