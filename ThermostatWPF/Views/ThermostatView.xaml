@@ -50,7 +50,7 @@
             <Button Command="{Binding PowerOff}" Style="{StaticResource ThermostatButton}" Content="Off"/>
             <Button Command="{Binding HigherTemp}" Style="{StaticResource ThermostatButton}" Content="+"/>
             <Button Command="{Binding LowerTemp}" Style="{StaticResource ThermostatButton}" Content="-"/>
-            <Button Command="{Binding RTS}" Style="{StaticResource ThermostatButton}" Content="RTS"/>
+            <Button Command="{Binding Reset}" Style="{StaticResource ThermostatButton}" Content="Reset"/>
             <Button Command="{Binding Exit}" Style="{StaticResource ThermostatButton}" Content="Exit"/>
         </StackPanel>
     </Grid>

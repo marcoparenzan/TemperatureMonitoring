@@ -27,23 +27,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ThermostatCore.Thermostat
+namespace ThermostatCore.Domain
 {
     public interface IThermostat
     {
-        decimal MaxWeight { get; }
-        decimal MinWeight { get; }
-
-        void Start();
-        bool Stable { get; }
-        decimal Current { get; }
+        void Switch();
+        bool On { get; }
         void Reset();
-        void Stop();
+        
+        void NotificationHandler(Action<string, string> nh);
 
-        event EventHandler Value;
-
-        void Suspend();
-
-        void Resume();
+        void PowerOn();
+        void PowerOff();
+        void HigherTemp();
+        void LowerTemp();
     }
 }

@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="Domain\RestSupervisor.cs" />
+    <Compile Include="Domain\ThermostatSimulator.cs" />
+    <Compile Include="Domain\SerialPortThermostat.cs" />
     <Compile Include="Views\NavigationWindow.xaml.cs">
       <DependentUpon>NavigationWindow.xaml</DependentUpon>
     </Compile>

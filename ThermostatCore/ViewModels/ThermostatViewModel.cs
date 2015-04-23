@@ -27,25 +27,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using ThermostatCore.Common;
+using ThermostatCore.Domain;
 
 namespace ThermostatCore.ViewModels
 {
     public partial class ThermostatViewModel
     {
         private INavigation _navigation;
-        private Action<string> _write;
+        private IThermostat _thermostat;
         private Action _exit1;
-        private Action _reset1;
-
-        public ThermostatViewModel(INavigation navigation, Action<string> write, Action exit, Action rts)
+        
+        public ThermostatViewModel(INavigation navigation, IThermostat thermostat, Action exit)
         {
             this._navigation = navigation;
-            this._write = write;
+            this._thermostat = thermostat;
             this._exit1 = exit;
-            this._reset1 = rts;
+
+            thermostat.NotificationHandler(HandleNotification);
         }
 
-        public void Handle(string messageType, string messageValue)
+        private void HandleNotification(string messageType, string messageValue)
         {
             switch (messageType)
             {
@@ -54,42 +55,41 @@ namespace ThermostatCore.ViewModels
                 case "STATE":
                     _navigation.Invoke(() =>
                     {
-                        var state = messageValue.Split(';');
-                        Temp = decimal.Parse(state[0].Replace(".", ","));
-                        TempRef = decimal.Parse(state[1]);
-                        Power = state[2] == "1";
-                        Resistor = state[3] == "1";
+                        try
+                        {
+                            var state = messageValue.Split(';');
+                            Temp = decimal.Parse(state[0].Replace(".", ","));
+                            TempRef = decimal.Parse(state[1]);
+                            Power = state[2] == "1";
+                            Resistor = state[3] == "1";
+                        }
+                        catch
+                        {
+                            _thermostat.Reset();
+                        }
                     });
                     break;
             }
         }
 
-        private void Command(string command)
-        {
-            _navigation.Invoke(() =>
-            {
-                _write(command);
-            });
-        }
-
         partial void OnPowerOff(ThermostatViewModel.PowerOffArgs args)
         {
-            Command("POWEROFF");
+            _thermostat.PowerOff();
         }
 
         partial void OnPowerOn(ThermostatViewModel.PowerOnArgs args)
         {
-            Command("POWERON");
+            _thermostat.PowerOn();
         }
 
         partial void OnHigherTemp(ThermostatViewModel.HigherTempArgs args)
         {
-            Command("HIGHERTEMP");
+            _thermostat.HigherTemp();
         }
 
         partial void OnLowerTemp(ThermostatViewModel.LowerTempArgs args)
         {
-            Command("LOWERTEMP");
+            _thermostat.LowerTemp();
         }
 
         partial void OnExit(ThermostatViewModel.ExitArgs args)
@@ -99,7 +99,7 @@ namespace ThermostatCore.ViewModels
 
         partial void OnReset(ThermostatViewModel.ResetArgs args)
         {
-            _reset1();
+            _thermostat.Reset();
         }
     }
 }

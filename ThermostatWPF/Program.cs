@@ -23,25 +23,22 @@
  */
 
 using System;
-using System.Configuration;
-using System.IO;
-using System.IO.Ports;
 using System.Windows;
 using ThermostatWPF.Views;
 using ThermostatCore.Common;
 using ThermostatCore.ViewModels;
-using System.Windows.Threading;
+using ThermostatCore.Domain;
+using ThermostatWPF.Domain;
 
 namespace ThermostatWPF
 {
     static class Program
     {
-
         [STAThread]
         static void Main(string[] args)
         {
-            var serialPortName = ConfigurationManager.AppSettings["ThermostatPort"];
-            var serial = new SerialPort(serialPortName, 9600, Parity.None, 8, StopBits.One);
+            IThermostat thermostat = new SerialPortThermostat();
+            ISupervisor supervisor = new RestSupervisor();
 
             var view = new NavigationWindow();
             view.WindowStyle = WindowStyle.None;
@@ -49,49 +46,18 @@ namespace ThermostatWPF
             view.WindowState = WindowState.Maximized;
             var navigation = (INavigation)view;
 
-            Action rts = () =>
-            {
-                serial.DtrEnable = true;
-                System.Threading.Thread.Sleep(100);
-                serial.DtrEnable = false;
-            };
-
-            var viewModel = new ThermostatViewModel(
+            navigation.View("ThermostatView").ViewModel(new ThermostatViewModel(
                 navigation
-                , _ => { serial.Write(_ + "\n"); }
+                , thermostat
                 , () => { view.Close(); }
-                , rts
-            );
-            serial.DataReceived += (s, e) =>
-            {
-                var line = serial.ReadLine();
-                line = line.Trim('\r', '\n', '\r', ' ');
-                if (string.IsNullOrWhiteSpace(line)) return;
-                var response = line.Split('=');
-                try
-                {
-                    viewModel.Handle(response[0].Trim().ToUpper(), response[1].Trim().ToUpper());
-                }
-                catch
-                {
-                    rts();
-                }
-            };
+            ));
 
-            serial.Open();
-            //var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-            //dispatcherTimer.Tick += (s, e) => {
-            //    serial.WriteLine("GETSTATE");            
-            //};
-            //dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 100);
-            //dispatcherTimer.Start();
-
-            navigation.View("ThermostatView").ViewModel(viewModel);
+            if (!thermostat.On) thermostat.Switch();
 
             var application = new Application();
             application.Run(view);
 
-            serial.Close();
+            if (thermostat.On) thermostat.Switch();
         }
     }
 }

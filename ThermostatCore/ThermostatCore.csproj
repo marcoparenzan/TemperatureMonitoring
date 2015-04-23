@@ -39,7 +39,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Thermostat\IThermostat.cs" />
+    <Compile Include="Domain\ISupervisor.cs" />
+    <Compile Include="Domain\IThermostat.cs" />
     <Compile Include="Common\BaseArgs.cs" />
     <Compile Include="Common\BaseCommand.cs" />
     <Compile Include="Common\BaseCommand_T.cs" />
