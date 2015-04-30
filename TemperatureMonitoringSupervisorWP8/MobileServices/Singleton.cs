@@ -44,7 +44,7 @@ namespace TemperatureMonitoringSupervisorWP8
             {
                 __singleton = new MobileServiceClient(
                     "https://temperaturemonitoring.azure-mobile.net",
-                    "QxzRNruxksNWqGpIfuvSYVIXQkQKwL17"
+                    "appkey"
                 );
                 var user = await AuthenticateAsync();
                 // http://blogs.msdn.com/b/cdndevs/archive/2014/11/11/part-3-azure-mobile-services-what-you-need-to-know-to-get-started-with-notification-hub.aspx
@@ -126,7 +126,7 @@ namespace TemperatureMonitoringSupervisorWP8
             //http://azure.microsoft.com/en-us/documentation/articles/mobile-services-windows-store-dotnet-get-started-offline-data/
             if (!__singleton.SyncContext.IsInitialized)
             {
-                var store = new MobileServiceSQLiteStore("temperaturemonitoring-offlinesync-6.db");
+                var store = new MobileServiceSQLiteStore("temperaturemonitoring-offlinesync-8.db");
                 store.DefineTable<T>();
                 await __singleton.SyncContext.InitializeAsync(store);
             }

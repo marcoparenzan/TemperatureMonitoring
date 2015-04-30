@@ -22,26 +22,29 @@
  * SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
-using Microsoft.WindowsAzure.MobileServices;
+using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Linq;
 
-namespace TemperatureMonitoringSupervisorWP8.Models
+namespace TemperatureMonitoringThermostatService.Models
 {
-    public class TemperatureSample
+    public class TemperatureMonitoringDataContext : DbContext
     {
-        public string Id { get; set; }
-        public string SensorId { get; set; }
-        public decimal Value { get; set; }
-        [CreatedAt]
-        public DateTime CreatedAt { get; set; }
+        // To enable Entity Framework migrations in the cloud, please ensure that the 
+        // service name, set by the 'MS_MobileServiceName' AppSettings in the local 
+        // Web.config, is the same as the service name when hosted in Azure.
+        private const string connectionStringName = "Name=MS_TableConnectionString";
 
-        public string Description {
-            get {
-                return string.Format("{0} {1}", CreatedAt, Value.ToString("0.00"));
-            }
+        public TemperatureMonitoringDataContext() : base(connectionStringName)
+        {
+        }
+
+        public DbSet<TemperatureSample> TemperatureSamples { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TemperatureSample>().ToTable("TemperatureMonitoring.TemperatureSamples");
         }
     }
+
 }

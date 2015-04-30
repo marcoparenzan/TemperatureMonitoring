@@ -32,6 +32,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
         <Image Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Source="/ThermostatWPF;component/Theme/1nn0va.png"></Image>
@@ -42,10 +43,11 @@
                 </gauges:OvalScale.Pointers>
             </gauges:OvalScale>
         </gauges:OvalScale>
-        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TempRef}" HorizontalAlignment="Center"/>
-        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Power}" HorizontalAlignment="Center"/>
-        <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding Resistor}" HorizontalAlignment="Center"/>
-        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="5" HorizontalAlignment="Center">
+        <TextBlock Grid.Row="3" Grid.ColumnSpan="5" TextWrapping="Wrap" HorizontalAlignment="Center" Foreground="White">PROGETTO DI TELEMETRIA DI APPARATI INDUSTRIALI NEL CLOUD</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding TempRef}" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Power}" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding Resistor}" HorizontalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="5" HorizontalAlignment="Center">
             <Button Command="{Binding PowerOn}" Style="{StaticResource ThermostatButton}" Content="On"/>
             <Button Command="{Binding PowerOff}" Style="{StaticResource ThermostatButton}" Content="Off"/>
             <Button Command="{Binding HigherTemp}" Style="{StaticResource ThermostatButton}" Content="+"/>

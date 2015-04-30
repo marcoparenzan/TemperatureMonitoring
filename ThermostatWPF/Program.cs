@@ -29,6 +29,12 @@ using ThermostatCore.Common;
 using ThermostatCore.ViewModels;
 using ThermostatCore.Domain;
 using ThermostatWPF.Domain;
+using ThermostatWPF.Models;
+using System.Configuration;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace ThermostatWPF
 {
@@ -38,7 +44,28 @@ namespace ThermostatWPF
         static void Main(string[] args)
         {
             IThermostat thermostat = new SerialPortThermostat();
+            //IThermostat thermostat = new ThermostatSimulator();
             ISupervisor supervisor = new RestSupervisor();
+
+            SignalRThermostat _thermostat = new SignalRThermostat(ConfigurationManager.AppSettings["SensorId"]);
+            _thermostat.Notify += (s, e) =>
+            {
+                switch (e)
+                {
+                    case "PowerOn":
+                        thermostat.PowerOn();
+                        break;
+                    case "PowerOff":
+                        thermostat.PowerOff();
+                        break;
+                    case "HigherTemp":
+                        thermostat.HigherTemp();
+                        break;
+                    case "LowerTemp":
+                        thermostat.LowerTemp();
+                        break;
+                }
+            };
 
             var view = new NavigationWindow();
             view.WindowStyle = WindowStyle.None;
@@ -49,6 +76,7 @@ namespace ThermostatWPF
             navigation.View("ThermostatView").ViewModel(new ThermostatViewModel(
                 navigation
                 , thermostat
+                , supervisor
                 , () => { view.Close(); }
             ));
 
@@ -58,6 +86,22 @@ namespace ThermostatWPF
             application.Run(view);
 
             if (thermostat.On) thermostat.Switch();
+
+            _thermostat.Unregister();
+        }
+
+        private static async Task Command(string sensorId, string command)
+        {
+            var commandUrl = ConfigurationManager.AppSettings["ThermostatServiceCommandUrl"];
+            var client = new HttpClient();
+            var content = new StringContent(JsonConvert.SerializeObject(new
+            {
+                command
+                ,
+                sensorId
+            }));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            await client.PostAsync(commandUrl, content);
         }
     }
 }

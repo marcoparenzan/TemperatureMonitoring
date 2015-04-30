@@ -33,6 +33,10 @@ using System;
 using Microsoft.WindowsAzure.Mobile.Service.Security;
 using Microsoft.WindowsAzure.Mobile.Service;
 using TemperatureMonitoringMobileService.MobileServices;
+using System.Configuration;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace TemperatureMonitoringMobileService.Controllers
 {
@@ -78,10 +82,11 @@ namespace TemperatureMonitoringMobileService.Controllers
 
         public async Task<IHttpActionResult> PostMonitoringCommand(MonitoringCommand item)
         {
+            await Command(item.SensorId, item.Command);
             MonitoringCommand current = await InsertAsync(item);
             ServiceUser serviceUser = (ServiceUser)this.User;
             var message = item.Command + " from " + serviceUser.Id;
-            Services.Log.Info(message);
+            //Services.Log.Info(message);
             await this.ToastAsync(message, serviceUser.Id);
             return CreatedAtRoute("Tables", new { id = current.Id }, current);
         }
@@ -89,6 +94,20 @@ namespace TemperatureMonitoringMobileService.Controllers
         public Task DeleteMonitoringCommand(string id)
         {
             return DeleteAsync(id);
+        }
+
+        private async Task Command(string sensorId, string command)
+        {
+            var commandUrl = ConfigurationManager.AppSettings["ThermostatServiceCommandUrl"];
+            var client = new HttpClient();
+            var content = new StringContent(JsonConvert.SerializeObject(new
+            {
+                command
+                ,
+                sensorId
+            }));
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            await client.PostAsync(commandUrl, content);
         }
     }
 }

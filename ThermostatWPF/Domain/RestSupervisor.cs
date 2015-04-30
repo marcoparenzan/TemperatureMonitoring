@@ -22,9 +22,12 @@
  * SOFTWARE.
  */
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using ThermostatCore.Domain;
@@ -33,5 +36,39 @@ namespace ThermostatWPF.Domain
 {
     public class RestSupervisor: ISupervisor
     {
+        private string _sensorId;
+        private string _ingestUrl;
+
+        public RestSupervisor()
+        {
+            _sensorId = ConfigurationManager.AppSettings["SensorId"];
+            _ingestUrl = ConfigurationManager.AppSettings["IngestUrl"];
+        }
+
+        public RestSupervisor(string sensorId, string supervisorRestUrl)
+        {
+            _sensorId = sensorId;
+            _ingestUrl = supervisorRestUrl;
+        }
+
+        public async Task Ingest(decimal temp, decimal refTemp, bool power, bool resistor)
+        {
+            var client = new HttpClient();
+            var message = new {
+                sensorId = _sensorId
+                ,
+                temp
+                ,
+                refTemp
+                ,
+                power
+                ,
+                resistor
+            };
+            var json = JsonConvert.SerializeObject(message);
+            var content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var response = await client.PostAsync(_ingestUrl, content);
+        }
     }
 }

@@ -38,7 +38,7 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding SensorId}" Margin="10,5" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Description}" Margin="10,5" VerticalAlignment="Center"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

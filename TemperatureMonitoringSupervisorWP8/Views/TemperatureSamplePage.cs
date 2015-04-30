@@ -42,7 +42,30 @@ namespace TemperatureMonitoringSupervisorWP8.Views
         private IMobileServiceTable<TemperatureSample> _sampleTable;
         //private IMobileServiceTable<MonitoringCommand> _monitoringCommandsTable;
         private IMobileServiceSyncTable<MonitoringCommand> _monitoringCommandsSyncTable;
-        
+
+        public TemperatureSamplePage()
+        {
+            this.InitializeComponent();
+            Windows.Phone.UI.Input.HardwareButtons.BackPressed += (s, e) =>
+            {
+                if (this.Frame != null && this.Frame.CanGoBack && _sourcePageType != null)
+                {
+                    e.Handled = true;
+                    this.Frame.Navigate(_sourcePageType);
+                }
+            };
+        }
+
+        private string _sensorId;
+        private Type _sourcePageType;
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            _sourcePageType = e.SourcePageType;
+            _sensorId = e.Parameter.ToString();
+            SensorId.Text = _sensorId;
+        }
+
         private async Task InitializeAsync()
         {
             await MobileServices.InitializeAsync();
@@ -100,20 +123,10 @@ namespace TemperatureMonitoringSupervisorWP8.Views
             ButtonRefresh.IsEnabled = true;
         }
 
+
+
+
         private MobileServiceCollection<TemperatureSample, TemperatureSample> _temperatureSamples;
-
-        public TemperatureSamplePage()
-        {
-            this.InitializeComponent();
-        }
-
-        private string _sensorId;
-
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            _sensorId = e.Parameter.ToString();
-            SensorId.Text = _sensorId;
-        }
 
         private async void ButtonRefresh_Click(object sender, RoutedEventArgs e)
         {

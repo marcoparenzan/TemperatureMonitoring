@@ -35,25 +35,28 @@ namespace ThermostatCore.ViewModels
     {
         private INavigation _navigation;
         private IThermostat _thermostat;
+        private ISupervisor _supervisor;
+        private DateTime _lastIngest;
         private Action _exit1;
         
-        public ThermostatViewModel(INavigation navigation, IThermostat thermostat, Action exit)
+        public ThermostatViewModel(INavigation navigation, IThermostat thermostat, ISupervisor supervisor, Action exit)
         {
             this._navigation = navigation;
             this._thermostat = thermostat;
+            this._supervisor = supervisor;
             this._exit1 = exit;
 
-            thermostat.NotificationHandler(HandleNotification);
+            thermostat.NotificationHandler(HandleNotificationAsync);
         }
 
-        private void HandleNotification(string messageType, string messageValue)
+        private async void HandleNotificationAsync(string messageType, string messageValue)
         {
             switch (messageType)
             {
                 case "COMMANDRESULT":
                     break;
                 case "STATE":
-                    _navigation.Invoke(() =>
+                    _navigation.Invoke(async () =>
                     {
                         try
                         {
@@ -62,6 +65,12 @@ namespace ThermostatCore.ViewModels
                             TempRef = decimal.Parse(state[1]);
                             Power = state[2] == "1";
                             Resistor = state[3] == "1";
+                            var now = DateTime.Now;
+                            if ((now - _lastIngest).TotalSeconds > 5)
+                            {
+                                _lastIngest = now;
+                                await _supervisor.Ingest(Temp, TempRef, Power, Resistor);
+                            }
                         }
                         catch
                         {

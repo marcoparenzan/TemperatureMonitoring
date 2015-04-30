@@ -32,5 +32,6 @@ namespace ThermostatCore.Domain
 {
     public interface ISupervisor
     {
+        Task Ingest(decimal temp, decimal refTemp, bool power, bool resistor);
     }
 }
